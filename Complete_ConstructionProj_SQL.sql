@@ -1,7 +1,8 @@
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+	role VARCHAR(50) UNIQUE NOT NULL
     email VARCHAR(100) UNIQUE NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
@@ -12,24 +13,6 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE roles (
-    role_id SERIAL PRIMARY KEY,
-    role_name VARCHAR(50) UNIQUE NOT NULL
-);
-
-INSERT INTO roles (role_name) VALUES 
-('site_engineer'), 
-('project_manager'), 
-('ceo'), 
-('admin');
-
-CREATE TABLE user_roles (
-    user_id INT NOT NULL,
-    role_id INT NOT NULL,
-    PRIMARY KEY (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE
-);
 
 CREATE TABLE user_permissions (
     permission_id SERIAL PRIMARY KEY,
@@ -39,7 +22,7 @@ CREATE TABLE user_permissions (
     can_create BOOLEAN DEFAULT FALSE,
     can_edit BOOLEAN DEFAULT FALSE,
     can_delete BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
@@ -72,7 +55,7 @@ CREATE TABLE projects (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES clients(client_id),
-    FOREIGN KEY (project_manager_id) REFERENCES users(user_id)
+    FOREIGN KEY (project_manager_id) REFERENCES users(id)
 );
 
 
@@ -109,7 +92,7 @@ CREATE TABLE daily_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (created_by) REFERENCES users(user_id)
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 
@@ -170,7 +153,7 @@ CREATE TABLE action_items (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (meeting_id) REFERENCES meetings(meeting_id) ON DELETE CASCADE,
-    FOREIGN KEY (assigned_to) REFERENCES users(user_id)
+    FOREIGN KEY (assigned_to) REFERENCES users(id)
 );
 
 
@@ -211,7 +194,7 @@ CREATE TABLE inventory_transactions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (item_id) REFERENCES inventory_items(item_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (performed_by) REFERENCES users(user_id)
+    FOREIGN KEY (performed_by) REFERENCES users(id)
 );
 
 CREATE TABLE inventory_requests (
@@ -228,7 +211,7 @@ CREATE TABLE inventory_requests (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
     FOREIGN KEY (requested_by) REFERENCES users(user_id),
-    FOREIGN KEY (approved_by) REFERENCES users(user_id)
+    FOREIGN KEY (approved_by) REFERENCES users(id)
 );
 
 
@@ -308,8 +291,8 @@ CREATE TABLE invoices (
     FOREIGN KEY (po_id) REFERENCES purchase_orders(po_id),
     FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (submitted_by) REFERENCES users(user_id),
-    FOREIGN KEY (approved_by) REFERENCES users(user_id)
+    FOREIGN KEY (submitted_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id)
 );
 
 
@@ -346,6 +329,7 @@ CREATE TYPE qc_result_enum AS ENUM (
 );
 
 
+
 CREATE TABLE drawings (
     drawing_id SERIAL PRIMARY KEY,
     project_id INT NOT NULL,
@@ -363,10 +347,9 @@ CREATE TABLE drawings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (uploaded_by) REFERENCES users(user_id),
-    FOREIGN KEY (approved_by) REFERENCES users(user_id)
+    FOREIGN KEY (uploaded_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id)
 );
-
 CREATE TABLE quality_controls (
     qc_id SERIAL PRIMARY KEY,
     project_id INT NOT NULL,
@@ -382,7 +365,7 @@ CREATE TABLE quality_controls (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (inspector_id) REFERENCES users(user_id)
+    FOREIGN KEY (inspector_id) REFERENCES users(id)
 );
 
 
@@ -452,7 +435,7 @@ CREATE TABLE project_team (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT unique_project_user UNIQUE (project_id, user_id)
 );
 
@@ -464,7 +447,7 @@ CREATE TABLE team_availability (
     status availability_status_enum DEFAULT 'available',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
@@ -483,7 +466,7 @@ CREATE TABLE notifications (
     related_id INT,
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 
@@ -497,7 +480,7 @@ CREATE TABLE system_activities (
     ip_address VARCHAR(45),
     user_agent TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 
